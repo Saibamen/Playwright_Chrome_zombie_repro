@@ -1,0 +1,48 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Playwright Chrome zombie process bug repro repository</h1>
+    <p>Remember to run this repository in Docker (Linux container)</p>
+</div>
+
+<div class="text-center">
+    <button id="btnCallController" class="btn btn-primary">Call Controller to run and close Playwright with Chrome browser</button>
+    <p>Number of calls: <span id="callCount">0</span></p>
+    <p>You should have: <b><span id="zombieCount">0</span> zombie processes</b> (see it by <code>top</code> command in container)</p>
+</div>
+
+<div id="resultDiv"></div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var callCount = 0;
+            var zombieCount = 0;
+
+            $('#btnCallController').click(function () {
+                $('#resultDiv').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+
+                callCount++;
+                $('#callCount').text(callCount);
+
+                $.ajax({
+                    url: '@Url.Action("Index", "Version")',
+                    type: 'GET',
+                    success: function (data) {
+                        $('#resultDiv').html(data);
+                        zombieCount = callCount * 2;
+                        $('#zombieCount').text(zombieCount);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr)
+                        $('#resultDiv').html('Error occurred while calling controller action. See debug output window in Visual Studio for more.<br />XHR Response text: '+ xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}
